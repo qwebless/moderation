@@ -91,11 +91,36 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .btn-primary:hover {
             background-color: #2a96e8;
+        }
+
+        /* КНОПКИ РЕЗЕРВНОГО КОПИРОВАНИЯ */
+        .backup-zone {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-backup {
+            flex: 1;
+            background-color: #243143;
+            color: #7993b0;
+            border: 1px solid #2b394a;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-backup:hover {
+            background-color: #2f3f54;
+            color: #fff;
         }
 
         .controls-panel {
@@ -191,7 +216,7 @@
             animation: clickFadeGradient 5s ease-out forwards;
         }
 
-        /* ИДЕАЛЬНОЕ ВЫРАВНИВАНИЕ В ОДИН РЯД */
+        /* ВЫРАВНИВАНИЕ */
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -268,10 +293,6 @@
             word-break: break-word;
         }
 
-        .item-border-line {
-            border-bottom: 1px rgba(255,255,255,0.1);
-        }
-
         .item-bundle {
             font-size: 11px;
             color: #7993b0;
@@ -331,6 +352,11 @@
 
     <button id="addBtn" class="btn-primary">Добавить в список</button>
 
+    <div class="backup-zone">
+        <button id="exportBtn" class="btn-backup">📤 СКОПИРОВАТЬ БАЗУ</button>
+        <button id="importBtn" class="btn-backup">📥 ВОССТАНОВИТЬ БАЗУ</button>
+    </div>
+
     <div class="controls-panel">
         <div class="panel-top">
             <div class="total-badge">ВСЕГО <span id="totalCount">0</span></div>
@@ -357,6 +383,8 @@
     const listContainer = document.getElementById('listContainer');
     const totalCountSpan = document.getElementById('totalCount');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
 
     [appNameInput, appNumberInput, appBundleInput].forEach(input => {
         input.addEventListener('keydown', (e) => {
@@ -367,7 +395,7 @@
         });
     });
 
-    // ФИКС БАГА С ТРАЙЛИНГОВЫМИ ПАЛКАМИ И ПОВТОРНЫМ ТЕКСТОМ
+    // ПАРСЕР
     appNameInput.addEventListener('input', (e) => {
         let val = e.target.value.replace(/\r?\n|\r/g, ' ').trim();
         
@@ -393,14 +421,48 @@
         }
     });
 
-    // СЛУШАТЕЛЬ КЛИКА МЫШИ (ВКЛЮЧАЯ КОЛЕСИКО МЫШИ) ДЛЯ АНИМАЦИИ ЗАТУХАНИЯ
+    // ЛОГИКА ЭКСПОРТА (Копирует в буфер обмена)
+    exportBtn.addEventListener('click', () => {
+        if (appList.length === 0) {
+            alert('Список пуст, экспортировать нечего!');
+            return;
+        }
+        const base64Data = btoa(unescape(encodeURIComponent(JSON.stringify(appList))));
+        navigator.clipboard.writeText(base64Data).then(() => {
+            alert(`База скопирована в буфер обмена! Сохрани её в Избранное ТГ.`);
+        }).catch(err => {
+            alert('Ошибка копирования. Вот твоя строка базы данных:\n\n' + base64Data);
+        });
+    });
+
+    // ЛОГИКА ИМПОРТА (Восстанавливает из строки)
+    importBtn.addEventListener('click', () => {
+        const str = prompt('Вставь строку бэкапа из Избранного:');
+        if (!str) return;
+        try {
+            const decodedData = decodeURIComponent(escape(atob(str.trim())));
+            const parsed = JSON.parse(decodedData);
+            if (Array.isArray(parsed)) {
+                appList = parsed;
+                selectedIds.clear();
+                saveAndRefresh();
+                alert('База успешно восстановлена!');
+            } else {
+                alert('Неверный формат бэкапа!');
+            }
+        } catch (e) {
+            alert('Ошибка при расшифровке данных! Убедись, что скопировал строку полностью.');
+        }
+    });
+
+    // КЛИКИ С КЛИК-ФЕЙДОМ
     listContainer.addEventListener('mousedown', (e) => {
         const linkWrapper = e.target.closest('.item-link-wrapper');
         if (linkWrapper) {
             const card = linkWrapper.closest('.item-card');
             if (card) {
                 card.classList.remove('recently-clicked');
-                void card.offsetWidth; // Триггер сброса анимации
+                void card.offsetWidth;
                 card.classList.add('recently-clicked');
             }
         }
@@ -454,3 +516,123 @@
                     </button>
                 </div>
             `;
+            listContainer.appendChild(card);
+        });
+
+        updateBulkButtonsVisibility(filteredApps);
+    }
+
+    listContainer.addEventListener('change', (e) => {
+        if (e.target.classList.contains('item-checkbox')) {
+            const id = e.target.getAttribute('data-id');
+            if (e.target.checked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+            const currentFilteredCount = appList.filter(app => {
+                const keyword = searchBar.value.toLowerCase().trim();
+                return app.name.toLowerCase().includes(keyword) || app.number.toLowerCase().includes(keyword) || app.bundle.toLowerCase().includes(keyword);
+            });
+            updateBulkButtonsVisibility(currentFilteredCount);
+        }
+    });
+
+    function updateBulkButtonsVisibility(currentFilteredApps) {
+        const selectedFilteredCount = currentFilteredApps.filter(app => selectedIds.has(app.id)).length;
+        if (selectedFilteredCount > 0) {
+            deleteSelectedBtn.style.display = 'block';
+            deleteSelectedBtn.textContent = `Удалить выбранные (${selectedFilteredCount})`;
+        } else {
+            deleteSelectedBtn.style.display = 'none';
+        }
+    }
+
+    deleteSelectedBtn.addEventListener('click', () => {
+        if (confirm(`Удалить выбранные элементы (${selectedIds.size} шт.)?`)) {
+            appList = appList.filter(app => !selectedIds.has(app.id));
+            selectedIds.clear();
+            saveAndRefresh();
+        }
+    });
+
+    addBtn.addEventListener('click', () => {
+        const name = appNameInput.value.trim();
+        const number = appNumberInput.value.trim();
+        const bundle = appBundleInput.value.trim();
+
+        if (!name) {
+            alert('Поле названия не должно быть пустым!');
+            return;
+        }
+        if (!bundle) {
+            alert('Поле бандла не должно быть пустым!');
+            return;
+        }
+
+        const isDuplicateBundle = appList.some(app => app.bundle.toLowerCase() === bundle.toLowerCase() && app.id !== editingId);
+        if (isDuplicateBundle) {
+            alert(`Ошибка: Приложение с бандлом "${bundle}" уже добавлено в список!`);
+            return;
+        }
+
+        if (editingId) {
+            appList = appList.map(app => app.id === editingId ? { ...app, name, number, bundle } : app);
+            editingId = null;
+            addBtn.textContent = 'Добавить в список';
+            addBtn.style.backgroundColor = '#2481cc';
+        } else {
+            const newApp = {
+                id: Date.now().toString(),
+                name,
+                number,
+                bundle
+            };
+            appList.push(newApp);
+        }
+
+        appNameInput.value = '';
+        appNumberInput.value = '';
+        appBundleInput.value = '';
+        saveAndRefresh();
+    });
+
+    window.editItem = function(id) {
+        const item = appList.find(app => app.id === id);
+        if (item) {
+            appNameInput.value = item.name;
+            appNumberInput.value = item.number;
+            appBundleInput.value = item.bundle;
+            editingId = id;
+            addBtn.textContent = 'Сохранить изменения';
+            addBtn.style.backgroundColor = '#e5a93c';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    window.deleteItem = function(id) {
+        appList = appList.filter(app => app.id !== id);
+        selectedIds.delete(id);
+        if (editingId === id) {
+            editingId = null;
+            addBtn.textContent = 'Добавить в список';
+            addBtn.style.backgroundColor = '#2481cc';
+            appNameInput.value = '';
+            appNumberInput.value = '';
+            appBundleInput.value = '';
+        }
+        saveAndRefresh();
+    };
+
+    searchBar.addEventListener('input', renderList);
+
+    function saveAndRefresh() {
+        localStorage.setItem('moderation_apps', JSON.stringify(appList));
+        renderList();
+    }
+
+    renderList();
+</script>
+
+</body>
+</html>
