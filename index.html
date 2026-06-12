@@ -18,6 +18,8 @@
             padding: 15px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
 
         .container {
@@ -27,6 +29,7 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
         }
 
         .form-group {
@@ -141,14 +144,35 @@
             background-color: #e54343;
         }
 
+        /* СПИСОК И НАСТРОЙКА СКРОЛЛБАРА */
         .list-container {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 500px;
+            max-height: 65vh;
             overflow-y: auto;
+            padding-right: 2px;
         }
 
+        .list-container::-webkit-scrollbar {
+            width: 5px;
+            background-color: transparent;
+        }
+
+        .list-container::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+
+        .list-container::-webkit-scrollbar-thumb {
+            background-color: #243143;
+            border-radius: 10px;
+        }
+
+        .list-container::-webkit-scrollbar-button {
+            display: none;
+        }
+
+        /* КАРТОЧКА И АНИМАЦИЯ ЗАТУХАНИЯ КЛИКА */
         .item-card {
             background-color: #24303f;
             border-radius: 10px;
@@ -156,18 +180,25 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: background-color 0.2s;
         }
 
-        .item-card:hover {
-            background-color: #2b394a;
+        @keyframes clickFadeGradient {
+            0% { background-color: #111822; }
+            100% { background-color: #24303f; }
         }
 
+        .item-card.recently-clicked {
+            animation: clickFadeGradient 5s ease-out forwards;
+        }
+
+        /* ИДЕАЛЬНОЕ ВЫРАВНИВАНИЕ В ОДИН РЯД */
         .checkbox-container {
-            display: inline-flex;
+            display: flex;
             align-items: center;
+            justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
+            height: 100%;
         }
 
         .checkbox-container input {
@@ -179,7 +210,7 @@
             height: 18px;
             border: 2px solid #52667a;
             border-radius: 4px;
-            display: inline-block;
+            display: block;
             position: relative;
             background-color: #101721;
         }
@@ -192,10 +223,10 @@
         .checkbox-container input:checked + .custom-checkbox::after {
             content: "";
             position: absolute;
-            left: 5px;
+            left: 4px;
             top: 1px;
             width: 4px;
-            height: 9px;
+            height: 8px;
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
@@ -216,6 +247,8 @@
             font-size: 14px;
             white-space: nowrap;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
 
         .item-text-center {
@@ -233,6 +266,10 @@
             font-size: 14px;
             color: #ffffff;
             word-break: break-word;
+        }
+
+        .item-border-line {
+            border-bottom: 1px rgba(255,255,255,0.1);
         }
 
         .item-bundle {
@@ -321,7 +358,6 @@
     const totalCountSpan = document.getElementById('totalCount');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
 
-    // Сабмит по Enter во всех инпутах
     [appNameInput, appNumberInput, appBundleInput].forEach(input => {
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -331,33 +367,42 @@
         });
     });
 
-    // БРОНЕБОЙНЫЙ СМАРТ-ПАРСЕР (Двойные палки + Переносы строк больше не ломают логику)
+    // ФИКС БАГА С ТРАЙЛИНГОВЫМИ ПАЛКАМИ И ПОВТОРНЫМ ТЕКСТОМ
     appNameInput.addEventListener('input', (e) => {
-        const val = e.target.value.trim();
+        let val = e.target.value.replace(/\r?\n|\r/g, ' ').trim();
         
-        // 1. Ищем номер в самом начале строки
         const numMatch = val.match(/^#?(\d+)/);
-        // 2. Ищем бандл внутри ПУСТЫХ или ПОСЛЕДНИХ палок на конце строки
-        const bundleMatch = val.match(/\|([a-zA-Z0-9._-]+)\|?\s*$/);
+        const bundleMatch = val.match(/([a-zA-Z0-9_-]+\.[a-zA-Z0-9._-]+)/g);
         
-        if (numMatch && bundleMatch) {
+        if (numMatch && bundleMatch && bundleMatch.length > 0) {
             const num = numMatch[1];
-            const bundle = bundleMatch[1].trim();
+            const bundle = bundleMatch[bundleMatch.length - 1].trim();
             
-            // 3. Вытаскиваем всё, что находится МЕЖДУ номером и бандлом
             let namePart = val.substring(numMatch[0].length);
-            const bundleIndex = val.lastIndexOf('|' + bundle);
+            
+            const bundleIndex = namePart.lastIndexOf(bundle);
             if (bundleIndex !== -1) {
                 namePart = namePart.substring(0, bundleIndex);
             }
             
-            // Чистим склеенное имя от лишних переносов, палок по краям и пробелов
             const name = namePart.replace(/^[\s|]+|[\s|]+$/g, '').trim();
             
-            // Распихиваем по полям
             appNumberInput.value = num;
             appBundleInput.value = bundle;
             appNameInput.value = name;
+        }
+    });
+
+    // СЛУШАТЕЛЬ КЛИКА МЫШИ (ВКЛЮЧАЯ КОЛЕСИКО МЫШИ) ДЛЯ АНИМАЦИИ ЗАТУХАНИЯ
+    listContainer.addEventListener('mousedown', (e) => {
+        const linkWrapper = e.target.closest('.item-link-wrapper');
+        if (linkWrapper) {
+            const card = linkWrapper.closest('.item-card');
+            if (card) {
+                card.classList.remove('recently-clicked');
+                void card.offsetWidth; // Триггер сброса анимации
+                card.classList.add('recently-clicked');
+            }
         }
     });
 
@@ -409,125 +454,3 @@
                     </button>
                 </div>
             `;
-            listContainer.appendChild(card);
-        });
-
-        updateBulkButtonsVisibility(filteredApps);
-    }
-
-    listContainer.addEventListener('change', (e) => {
-        if (e.target.classList.contains('item-checkbox')) {
-            const id = e.target.getAttribute('data-id');
-            if (e.target.checked) {
-                selectedIds.add(id);
-            } else {
-                selectedIds.delete(id);
-            }
-            const currentFilteredCount = appList.filter(app => {
-                const keyword = searchBar.value.toLowerCase().trim();
-                return app.name.toLowerCase().includes(keyword) || app.number.toLowerCase().includes(keyword) || app.bundle.toLowerCase().includes(keyword);
-            });
-            updateBulkButtonsVisibility(currentFilteredCount);
-        }
-    });
-
-    function updateBulkButtonsVisibility(currentFilteredApps) {
-        const selectedFilteredCount = currentFilteredApps.filter(app => selectedIds.has(app.id)).length;
-        if (selectedFilteredCount > 0) {
-            deleteSelectedBtn.style.display = 'block';
-            deleteSelectedBtn.textContent = `Удалить выбранные (${selectedFilteredCount})`;
-        } else {
-            deleteSelectedBtn.style.display = 'none';
-        }
-    }
-
-    deleteSelectedBtn.addEventListener('click', () => {
-        if (confirm(`Удалить выбранные элементы (${selectedIds.size} шт.)?`)) {
-            appList = appList.filter(app => !selectedIds.has(app.id));
-            selectedIds.clear();
-            saveAndRefresh();
-        }
-    });
-
-    // Добавление + Фикс дублей бандлов
-    addBtn.addEventListener('click', () => {
-        const name = appNameInput.value.trim();
-        const number = appNumberInput.value.trim();
-        const bundle = appBundleInput.value.trim();
-
-        if (!name) {
-            alert('Поле названия не должно быть пустым!');
-            return;
-        }
-        if (!bundle) {
-            alert('Поле бандла не должно быть пустым!');
-            return;
-        }
-
-        // Проверка дублей бандла
-        const isDuplicateBundle = appList.some(app => app.bundle.toLowerCase() === bundle.toLowerCase() && app.id !== editingId);
-        if (isDuplicateBundle) {
-            alert(`Ошибка: Приложение с бандлом "${bundle}" уже добавлено в список!`);
-            return;
-        }
-
-        if (editingId) {
-            appList = appList.map(app => app.id === editingId ? { ...app, name, number, bundle } : app);
-            editingId = null;
-            addBtn.textContent = 'Добавить в список';
-            addBtn.style.backgroundColor = '#2481cc';
-        } else {
-            const newApp = {
-                id: Date.now().toString(),
-                name,
-                number,
-                bundle
-            };
-            appList.push(newApp);
-        }
-
-        appNameInput.value = '';
-        appNumberInput.value = '';
-        appBundleInput.value = '';
-        saveAndRefresh();
-    });
-
-    window.editItem = function(id) {
-        const item = appList.find(app => app.id === id);
-        if (item) {
-            appNameInput.value = item.name;
-            appNumberInput.value = item.number;
-            appBundleInput.value = item.bundle;
-            editingId = id;
-            addBtn.textContent = 'Сохранить изменения';
-            addBtn.style.backgroundColor = '#e5a93c';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    window.deleteItem = function(id) {
-        appList = appList.filter(app => app.id !== id);
-        selectedIds.delete(id);
-        if (editingId === id) {
-            editingId = null;
-            addBtn.textContent = 'Добавить в список';
-            addBtn.style.backgroundColor = '#2481cc';
-            appNameInput.value = '';
-            appNumberInput.value = '';
-            appBundleInput.value = '';
-        }
-        saveAndRefresh();
-    };
-
-    searchBar.addEventListener('input', renderList);
-
-    function saveAndRefresh() {
-        localStorage.setItem('moderation_apps', JSON.stringify(appList));
-        renderList();
-    }
-
-    renderList();
-</script>
-
-</body>
-</html>
