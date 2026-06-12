@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Модерация Бандлов</title>
+    <title>Модерация Бандлов Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-            background-color: #18222d; /* Нативный темный фон ТГ */
+            background-color: #18222d;
             color: #ffffff;
             padding: 16px;
             margin: 0;
@@ -16,7 +16,6 @@
             -webkit-font-smoothing: antialiased;
         }
         
-        /* Контейнер формы */
         .form-group {
             background: linear-gradient(145deg, #243141, #1e2936);
             padding: 16px;
@@ -24,6 +23,21 @@
             margin-bottom: 20px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.03);
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-block {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .input-block.short {
+            max-width: 80px;
         }
         
         label {
@@ -55,7 +69,6 @@
             outline: none;
         }
         
-        /* Кнопка добавить */
         button.add-btn {
             width: 100%;
             background: linear-gradient(135deg, #2481cc, #1a6fa8);
@@ -70,114 +83,135 @@
             box-shadow: 0 4px 12px rgba(36, 129, 204, 0.2);
         }
         
-        button.add-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(36, 129, 204, 0.3);
-        }
-
-        button.add-btn:active {
-            transform: translateY(1px);
-        }
+        button.add-btn:hover { transform: translateY(-1px); }
+        button.add-btn:active { transform: translateY(1px); }
         
-        .list-header {
-            font-size: 13px;
-            color: #7e92a4;
-            margin: 24px 0 10px 4px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Карточки бандлов */
-        .card {
-            background-color: #212d3b;
-            padding: 14px 16px;
-            border-radius: 14px;
-            margin-bottom: 12px;
+        .list-controls {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            margin: 24px 0 14px 4px;
+            gap: 16px;
+        }
+
+        .counter-badge {
+            font-size: 13px;
+            color: #7e92a4;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .counter-badge span {
+            color: #4ba3e3;
+            font-size: 15px;
+        }
+
+        .search-input {
+            margin-bottom: 0;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            background-color: #212d3b;
+            max-width: 200px;
+        }
+        
+        .card {
+            background-color: #212d3b;
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             border: 1px solid rgba(255,255,255,0.02);
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.25s ease;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .card-info {
+        .card-number {
+            font-size: 16px;
+            font-weight: 700;
+            color: #4ba3e3;
+            min-width: 55px;
+            flex-shrink: 0;
+        }
+        
+        .card-main-link {
+            flex-grow: 1;
+            text-decoration: none;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            flex-grow: 1;
+            gap: 2px;
+            margin: 0 12px;
+            min-width: 0;
         }
         
         .card-name {
             font-size: 15px;
             font-weight: 600;
             color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .card-bundle {
             font-size: 12px;
             font-family: 'Courier New', Courier, monospace;
             color: #7e92a4;
-            word-break: break-all;
-            background: #18222d;
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .card-link {
-            color: #4ba3e3;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            margin-top: 6px;
-            display: inline-flex;
+        .card-actions {
+            display: flex;
             align-items: center;
             gap: 4px;
-            transition: color 0.2s;
+            flex-shrink: 0;
         }
         
-        .card-link:hover {
-            color: #64b5f6;
-        }
-        
-        /* Кнопка удаления (мусорка) */
-        .delete-btn {
+        .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
-            background-color: rgba(239, 83, 80, 0.05);
         }
         
-        .delete-btn:hover {
-            background-color: rgba(239, 83, 80, 0.15);
-            transform: scale(1.05);
-        }
-        
-        .delete-btn svg {
-            fill: #ef5350;
-        }
+        .edit-btn { background-color: rgba(75, 163, 227, 0.05); }
+        .edit-btn:hover { background-color: rgba(75, 163, 227, 0.15); transform: scale(1.05); }
+        .edit-btn svg { fill: #4ba3e3; }
+
+        .delete-btn { background-color: rgba(239, 83, 80, 0.05); }
+        .delete-btn:hover { background-color: rgba(239, 83, 80, 0.15); transform: scale(1.05); }
+        .delete-btn svg { fill: #ef5350; }
     </style>
 </head>
 <body>
 
     <div class="form-group">
-        <label>Название приложения / Номер:</label>
-        <input type="text" id="appName" placeholder="Например: Аппка 1 или Карточка Асаны">
+        <div class="input-row">
+            <div class="input-block short">
+                <label>№:</label>
+                <input type="text" id="appNumber" placeholder="25">
+            </div>
+            <div class="input-block">
+                <label>Название / Умная вставка:</label>
+                <input type="text" id="appName" placeholder="Вставь строку или имя" oninput="detectSmartPaste(this)">
+            </div>
+        </div>
         
         <label>Бандл:</label>
         <input type="text" id="appBundle" placeholder="com.company.app">
@@ -185,7 +219,11 @@
         <button class="add-btn" onclick="addApp()">Добавить в список</button>
     </div>
 
-    <div class="list-header">📋 Твой список на модерацию:</div>
+    <div class="list-controls">
+        <div class="counter-badge">Всего: <span id="totalCount">0</span></div>
+        <input type="text" id="searchBar" class="search-input" placeholder="🔍 Поиск..." oninput="renderList()">
+    </div>
+
     <div id="appList"></div>
 
     <script>
@@ -193,78 +231,155 @@
         tg.ready();
         tg.expand();
 
-        // Читаем сохраненные данные из памяти устройства при старте. Если там пусто — создаем пустой массив.
         let apps = JSON.parse(localStorage.getItem('moderation_dashboard_apps')) || [];
 
+        // Улучшенный парсер: триггерится только на палки |, чтобы не мешать писать руками
+        function detectSmartPaste(inputElement) {
+            const val = inputElement.value;
+            
+            if (val.includes('|')) {
+                let text = val.trim();
+                let number = "";
+                let bundle = "";
+
+                // 1. Вытаскиваем бандл из палок |...|
+                const pipeMatch = text.match(/\|([^|]+)\|/);
+                if (pipeMatch) {
+                    bundle = pipeMatch[1].trim();
+                    text = text.replace(/\|[^|]+\|/, '').trim();
+                }
+
+                // 2. Вытаскиваем номер карточки
+                const numMatch = text.match(/^#?(\d+)/);
+                if (numMatch) {
+                    number = numMatch[1].trim();
+                    text = text.replace(/^#?(\d+)/, '').trim();
+                }
+
+                // 3. Остаток — чистое название
+                let name = text.trim();
+
+                if (number) document.getElementById('appNumber').value = number;
+                if (bundle) document.getElementById('appBundle').value = bundle;
+                if (name) inputElement.value = name;
+            }
+        }
+
         function addApp() {
+            const numInput = document.getElementById('appNumber');
             const nameInput = document.getElementById('appName');
             const bundleInput = document.getElementById('appBundle');
             
+            const number = numInput.value.trim() || "—";
             const name = nameInput.value.trim();
             const bundle = bundleInput.value.trim();
 
             if (!name || !bundle) {
-                alert('Бро, заполни оба поля!');
+                alert('Название и бандл обязательны!');
                 return;
             }
 
             const newApp = {
                 id: Date.now(),
+                number: number,
                 name: name,
                 bundle: bundle
             };
 
             apps.push(newApp);
-
-            // Сохраняем обновленный массив в память устройства
             localStorage.setItem('moderation_dashboard_apps', JSON.stringify(apps));
 
+            numInput.value = '';
             nameInput.value = '';
             bundleInput.value = '';
 
             renderList();
         }
 
+        function editApp(id) {
+            const app = apps.find(a => a.id === id);
+            if (!app) return;
+
+            const currentNum = app.number || "—";
+            const newNum = prompt("Изменить номер карточки:", currentNum);
+            if (newNum === null) return;
+
+            const newName = prompt("Изменить название приложения:", app.name);
+            if (newName === null) return;
+
+            const newBundle = prompt("Изменить бандл:", app.bundle);
+            if (newBundle === null) return;
+
+            app.number = newNum.trim() || "—";
+            app.name = newName.trim() || app.name;
+            app.bundle = newBundle.trim() || app.bundle;
+
+            localStorage.setItem('moderation_dashboard_apps', JSON.stringify(apps));
+            renderList();
+        }
+
         function deleteApp(id) {
             apps = apps.filter(app => app.id !== id);
-            
-            // Перезаписываем память после удаления
             localStorage.setItem('moderation_dashboard_apps', JSON.stringify(apps));
-            
             renderList();
         }
 
         function renderList() {
             const listDiv = document.getElementById('appList');
+            if (!listDiv) return;
+            
+            const searchQuery = document.getElementById('searchBar').value.toLowerCase().trim();
             listDiv.innerHTML = '';
 
-            if (apps.length === 0) {
-                listDiv.innerHTML = '<div style="color: #7e92a4; font-size: 13px; margin-left: 4px; font-style: italic;">Список пуст. Добавь приложения выше.</div>';
+            // Безопасная фильтрация (защита от краша на старых данных)
+            const filteredApps = apps.filter(app => {
+                const num = (app.number || "—").toString().toLowerCase();
+                const name = (app.name || "").toString().toLowerCase();
+                const bundle = (app.bundle || "").toString().toLowerCase();
+                
+                return name.includes(searchQuery) || 
+                       bundle.includes(searchQuery) || 
+                       num.includes(searchQuery);
+            });
+
+            document.getElementById('totalCount').innerText = apps.length;
+
+            if (filteredApps.length === 0) {
+                listDiv.innerHTML = '<div style="color: #7e92a4; font-size: 13px; margin-left: 4px; font-style: italic;">Список пуст...</div>';
                 return;
             }
 
-            apps.forEach(app => {
+            filteredApps.forEach(app => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                const appNum = app.number || "—";
                 const url = `https://play.google.com/store/apps/details?id=${app.bundle}`;
 
                 card.innerHTML = `
-                    <div class="card-info">
+                    <div class="card-number">#${appNum}</div>
+                    
+                    <a href="${url}" target="_blank" class="card-main-link">
                         <div class="card-name">${app.name}</div>
-                        <div><span class="card-bundle">${app.bundle}</span></div>
-                        <a href="${url}" target="_blank" class="card-link">🚀 Открыть в Play Market</a>
+                        <div class="card-bundle">${app.bundle}</div>
+                    </a>
+                    
+                    <div class="card-actions">
+                        <button class="action-btn edit-btn" onclick="editApp(${app.id})" title="Изменить">
+                            <svg width="16" height="16" viewBox="0 0 24 24">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteApp(${app.id})" title="Удалить">
+                            <svg width="16" height="16" viewBox="0 0 24 24">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </svg>
+                        </button>
                     </div>
-                    <button class="delete-btn" onclick="deleteApp(${app.id})">
-                        <svg width="18" height="18" viewBox="0 0 24 24">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                        </svg>
-                    </button>
                 `;
                 listDiv.appendChild(card);
             });
         }
 
-        // Рендерим список сразу при открытии
         renderList();
     </script>
 </body>
