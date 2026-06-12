@@ -201,7 +201,6 @@
             transform: rotate(45deg);
         }
 
-        /* Кликабельная ссылка-обертка для внутренностей карточки */
         .item-link-wrapper {
             flex: 1;
             display: flex;
@@ -322,29 +321,46 @@
     const totalCountSpan = document.getElementById('totalCount');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
 
-    // Фикс 1: Активация и отправка по нажатию на Enter в любом поле ввода
+    // Сабмит по Enter во всех инпутах
     [appNameInput, appNumberInput, appBundleInput].forEach(input => {
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                e.preventDefault(); // Предотвращаем стандартный сабмит
-                addBtn.click(); // Имитируем клик по кнопке добавления
+                e.preventDefault();
+                addBtn.click();
             }
         });
     });
 
-    // Умный парсер строки
+    // БРОНЕБОЙНЫЙ СМАРТ-ПАРСЕР (Двойные палки + Переносы строк больше не ломают логику)
     appNameInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
-        const match = val.match(/^#?(\d+)\s+([^|]+?)\s*\|([^|]+)\|/);
         
-        if (match) {
-            appNumberInput.value = match[1];
-            appNameInput.value = match[2].trim();
-            appBundleInput.value = match[3].trim();
+        // 1. Ищем номер в самом начале строки
+        const numMatch = val.match(/^#?(\d+)/);
+        // 2. Ищем бандл внутри ПУСТЫХ или ПОСЛЕДНИХ палок на конце строки
+        const bundleMatch = val.match(/\|([a-zA-Z0-9._-]+)\|?\s*$/);
+        
+        if (numMatch && bundleMatch) {
+            const num = numMatch[1];
+            const bundle = bundleMatch[1].trim();
+            
+            // 3. Вытаскиваем всё, что находится МЕЖДУ номером и бандлом
+            let namePart = val.substring(numMatch[0].length);
+            const bundleIndex = val.lastIndexOf('|' + bundle);
+            if (bundleIndex !== -1) {
+                namePart = namePart.substring(0, bundleIndex);
+            }
+            
+            // Чистим склеенное имя от лишних переносов, палок по краям и пробелов
+            const name = namePart.replace(/^[\s|]+|[\s|]+$/g, '').trim();
+            
+            // Распихиваем по полям
+            appNumberInput.value = num;
+            appBundleInput.value = bundle;
+            appNameInput.value = name;
         }
     });
 
-    // Фикс 2, 5 и 6: Отрисовка списка с новым дизайном и ссылкой на Google Play
     function renderList() {
         listContainer.innerHTML = '';
         const searchKeyword = searchBar.value.toLowerCase().trim();
@@ -378,7 +394,6 @@
                 
                 <a href="https://play.google.com/store/apps/details?id=${app.bundle}" target="_blank" class="item-link-wrapper">
                     <span class="item-num">${app.number ? '#' + app.number : '#__'}</span>
-                    
                     <div class="item-text-center">
                         <span class="item-name">${app.name}</span>
                         <span class="item-bundle">${app.bundle || 'нет бандла'}</span>
@@ -434,7 +449,7 @@
         }
     });
 
-    // Добавление и проверка на дубликаты бандлов
+    // Добавление + Фикс дублей бандлов
     addBtn.addEventListener('click', () => {
         const name = appNameInput.value.trim();
         const number = appNumberInput.value.trim();
@@ -449,9 +464,8 @@
             return;
         }
 
-        // Фикс 3: Проверка на одинаковые бандлы (проверяем регистр букв на всякий случай)
+        // Проверка дублей бандла
         const isDuplicateBundle = appList.some(app => app.bundle.toLowerCase() === bundle.toLowerCase() && app.id !== editingId);
-        
         if (isDuplicateBundle) {
             alert(`Ошибка: Приложение с бандлом "${bundle}" уже добавлено в список!`);
             return;
