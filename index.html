@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модерация</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #18222d; /* Темная тема ТГ */
+            color: #ffffff;
+            padding: 16px;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .form-group {
+            background-color: #212d3b;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #64b5f6;
+            margin-bottom: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        input {
+            width: 100%;
+            background-color: #18222d;
+            border: 1px solid #2f3e4e;
+            border-radius: 8px;
+            color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        input:focus {
+            border-color: #2481cc;
+            outline: none;
+        }
+        button.add-btn {
+            width: 100%;
+            background-color: #2481cc;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button.add-btn:hover {
+            background-color: #1c6fa8;
+        }
+        .list-header {
+            font-size: 14px;
+            color: #b1c3d4;
+            margin: 20px 0 10px 4px;
+            font-weight: bold;
+        }
+        .card {
+            background-color: #212d3b;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+        .card-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .card-bundle {
+            font-size: 12px;
+            font-family: monospace;
+            color: #889bb0;
+            word-break: break-all;
+        }
+        .card-link {
+            color: #64b5f6;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: rgba(239, 83, 80, 0.2);
+        }
+        .delete-btn svg {
+            fill: #ef5350; /* Красный цвет мусорки */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-group">
+        <label>Название приложения (или номер кароч):</label>
+        <input type="text" id="appName" placeholder="Например: Аппка 1 или Номер карточки">
+        
+        <label>Бандл:</label>
+        <input type="text" id="appBundle" placeholder="com.company.app">
+        
+        <button class="add-btn" onclick="addApp()">Добавить в список</button>
+    </div>
+
+    <div class="list-header">📋 Твой список на проверку:</div>
+    <div id="appList"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Массив, где будут храниться наши приложения
+        let apps = [];
+
+        function addApp() {
+            const nameInput = document.getElementById('appName');
+            const bundleInput = document.getElementById('appBundle');
+            
+            const name = nameInput.value.trim();
+            const bundle = bundleInput.value.trim();
+
+            // Проверяем, чтобы поля не были пустыми
+            if (!name || !bundle) {
+                alert('Бро, заполни и название, и бандл!');
+                return;
+            }
+
+            // Создаем объект приложения
+            const newApp = {
+                id: Date.now(), // Уникальный ID для удаления
+                name: name,
+                bundle: bundle
+            };
+
+            // Добавляем в массив
+            apps.push(newApp);
+
+            // Очищаем поля ввода
+            nameInput.value = '';
+            bundleInput.value = '';
+
+            // Обновляем список на экране
+            renderList();
+        }
+
+        function deleteApp(id) {
+            // Фильтруем массив, удаляя элемент с нужным ID
+            apps = apps.filter(app => app.id !== id);
+            renderList();
+        }
+
+        function renderList() {
+            const listDiv = document.getElementById('appList');
+            listDiv.innerHTML = ''; // Очищаем экран
+
+            if (apps.length === 0) {
+                listDiv.innerHTML = '<div style="color: #889bb0; font-size: 13px; margin-left: 4px;">Список пуст. Добавь бандлы выше.</div>';
+                return;
+            }
+
+            apps.forEach(app => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const url = `https://play.google.com/store/apps/details?id=${app.bundle}`;
+
+                card.innerHTML = `
+                    <div class="card-info">
+                        <div class="card-name">${app.name}</div>
+                        <div class="card-bundle">${app.bundle}</div>
+                        <a href="${url}" target="_blank" class="card-link">🔗 Открыть в Play Market</a>
+                    </div>
+                    <button class="delete-btn" onclick="deleteApp(${app.id})" title="Удалить">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                `;
+                listDiv.appendChild(card);
+            });
+        }
+
+        // Первичный рендер пустого списка
+        renderList();
+    </script>
+</body>
+</html>
