@@ -3,384 +3,547 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Модерация Бандлов Pro</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Модерация приложений</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-            background-color: #18222d;
-            color: #ffffff;
-            padding: 16px;
-            margin: 0;
+        * {
             box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        
+
+        body {
+            background-color: #0e1621;
+            color: #ffffff;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #17212b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
         .form-group {
-            background: linear-gradient(145deg, #243141, #1e2936);
-            padding: 16px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.03);
+            margin-bottom: 12px;
         }
-        
-        .input-row {
+
+        .form-row {
             display: flex;
             gap: 10px;
+            margin-bottom: 15px;
         }
 
-        .input-block {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+        .form-row .group-num {
+            flex: 0 0 25%; /* Маленькое поле для номера */
         }
 
-        .input-block.short {
-            max-width: 80px;
+        .form-row .group-bundle {
+            flex: 1; /* Поле бандла забирает всё оставшееся место */
         }
-        
+
         label {
             display: block;
             font-size: 11px;
-            color: #4ba3e3;
+            font-weight: bold;
+            color: #3b88c3;
             margin-bottom: 6px;
-            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         input {
             width: 100%;
-            background-color: #18212d;
-            border: 1px solid #2f3e4e;
-            border-radius: 10px;
-            color: #ffffff;
+            background-color: #101721;
+            border: 1px solid #243143;
+            border-radius: 8px;
             padding: 12px;
-            box-sizing: border-box;
+            color: #fff;
             font-size: 14px;
-            margin-bottom: 14px;
-            transition: all 0.2s ease;
-        }
-        
-        input:focus {
-            border-color: #2481cc;
-            box-shadow: 0 0 0 2px rgba(36, 129, 204, 0.3);
             outline: none;
+            transition: border-color 0.2s;
         }
-        
-        button.add-btn {
+
+        input:focus {
+            border-color: #3b88c3;
+        }
+
+        input::placeholder {
+            color: #52667a;
+        }
+
+        .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #2481cc, #1a6fa8);
+            background-color: #2481cc;
             color: #ffffff;
             border: none;
             border-radius: 10px;
             padding: 14px;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(36, 129, 204, 0.2);
+            transition: background-color 0.2s;
+            margin-bottom: 20px;
         }
-        
-        button.add-btn:hover { transform: translateY(-1px); }
-        button.add-btn:active { transform: translateY(1px); }
-        
-        .list-controls {
+
+        .btn-primary:hover {
+            background-color: #2a96e8;
+        }
+
+        /* Панель управления поиском и массовыми действиями */
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #243143;
+        }
+
+        .panel-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 24px 0 14px 4px;
-            gap: 16px;
         }
 
-        .counter-badge {
+        .total-badge {
             font-size: 13px;
-            color: #7e92a4;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
+            font-weight: bold;
+            color: #7993b0;
         }
 
-        .counter-badge span {
-            color: #4ba3e3;
-            font-size: 15px;
+        .total-badge span {
+            color: #2481cc;
         }
 
-        .search-input {
-            margin-bottom: 0;
-            padding: 8px 12px;
-            font-size: 13px;
-            border-radius: 8px;
-            background-color: #212d3b;
-            max-width: 200px;
+        .search-wrapper {
+            width: 100%;
         }
-        
-        .card {
-            background-color: #212d3b;
-            padding: 12px 16px;
-            border-radius: 14px;
-            margin-bottom: 10px;
+
+        .bulk-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background-color: #242f3d;
+            color: #7993b0;
+            border: 1px solid #3b4b5e;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            color: #fff;
+            border-color: #52667a;
+        }
+
+        .btn-danger-bulk {
+            background-color: #ca3a3a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none; /* Показываем только когда выбрано > 0 */
+        }
+
+        .btn-danger-bulk:hover {
+            background-color: #e54343;
+        }
+
+        /* Список плашек */
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .item-card {
+            background-color: #24303f;
+            border-radius: 10px;
+            padding: 12px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: 1px solid rgba(255,255,255,0.02);
-            animation: fadeIn 0.25s ease;
+            gap: 12px;
+            transition: background-color 0.2s;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .item-card:hover {
+            background-color: #2b394a;
         }
-        
-        .card-number {
-            font-size: 16px;
-            font-weight: 700;
-            color: #4ba3e3;
-            min-width: 55px;
-            flex-shrink: 0;
+
+        /* Кастомный чекбокс */
+        .checkbox-container {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
         }
-        
-        .card-main-link {
-            flex-grow: 1;
-            text-decoration: none;
+
+        .checkbox-container input {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #52667a;
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+            background-color: #101721;
+        }
+
+        .checkbox-container input:checked + .custom-checkbox {
+            background-color: #2481cc;
+            border-color: #2481cc;
+        }
+
+        .checkbox-container input:checked + .custom-checkbox::after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 4px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .item-info {
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 2px;
-            margin: 0 12px;
-            min-width: 0;
         }
-        
-        .card-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .card-bundle {
-            font-size: 12px;
-            font-family: 'Courier New', Courier, monospace;
-            color: #7e92a4;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .card-actions {
+
+        .item-header {
             display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
+            align-items: baseline;
+            gap: 8px;
         }
-        
+
+        .item-num {
+            color: #4f9fdd;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #ffffff;
+            word-break: break-word;
+        }
+
+        .item-bundle {
+            font-size: 11px;
+            color: #7993b0;
+            word-break: break-word;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
         .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 6px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s;
         }
-        
-        .edit-btn { background-color: rgba(75, 163, 227, 0.05); }
-        .edit-btn:hover { background-color: rgba(75, 163, 227, 0.15); transform: scale(1.05); }
-        .edit-btn svg { fill: #4ba3e3; }
 
-        .delete-btn { background-color: rgba(239, 83, 80, 0.05); }
-        .delete-btn:hover { background-color: rgba(239, 83, 80, 0.15); transform: scale(1.05); }
-        .delete-btn svg { fill: #ef5350; }
+        .btn-edit { color: #3b88c3; }
+        .btn-edit:hover { background-color: rgba(59, 136, 195, 0.15); }
+        .btn-delete { color: #e54343; }
+        .btn-delete:hover { background-color: rgba(229, 67, 67, 0.15); }
+
+        .empty-mock {
+            text-align: center;
+            color: #52667a;
+            font-size: 13px;
+            padding: 20px 0;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
 
+<div class="container">
     <div class="form-group">
-        <div class="input-row">
-            <div class="input-block short">
-                <label>№:</label>
-                <input type="text" id="appNumber" placeholder="25">
-            </div>
-            <div class="input-block">
-                <label>Название / Умная вставка:</label>
-                <input type="text" id="appName" placeholder="Вставь строку или имя" oninput="detectSmartPaste(this)">
+        <label for="appName">Название / Умная вставка:</label>
+        <input type="text" id="appName" placeholder="Вставь строку или имя">
+    </div>
+
+    <div class="form-row">
+        <div class="group-num">
+            <label for="appNumber">№:</label>
+            <input type="text" id="appNumber" placeholder="25">
+        </div>
+        <div class="group-bundle">
+            <label for="appBundle">Бандл:</label>
+            <input type="text" id="appBundle" placeholder="com.company.app">
+        </div>
+    </div>
+
+    <button id="addBtn" class="btn-primary">Добавить в список</button>
+
+    <div class="controls-panel">
+        <div class="panel-top">
+            <div class="total-badge">ВСЕГО: <span id="totalCount">0</span></div>
+            <div class="bulk-actions">
+                <button id="selectAllBtn" class="btn-secondary">Выбрать все</button>
+                <button id="deleteSelectedBtn" class="btn-danger-bulk">Удалить выбранные (0)</button>
             </div>
         </div>
-        
-        <label>Бандл:</label>
-        <input type="text" id="appBundle" placeholder="com.company.app">
-        
-        <button class="add-btn" onclick="addApp()">Добавить в список</button>
+        <div class="search-wrapper">
+            <input type="text" id="searchBar" placeholder="🔍 Поиск по номеру, имени или бандлу...">
+        </div>
     </div>
 
-    <div class="list-controls">
-        <div class="counter-badge">Всего: <span id="totalCount">0</span></div>
-        <input type="text" id="searchBar" class="search-input" placeholder="🔍 Поиск..." oninput="renderList()">
-    </div>
+    <div id="listContainer" class="list-container"></div>
+</div>
 
-    <div id="appList"></div>
+<script>
+    let appList = JSON.parse(localStorage.getItem('moderation_apps')) || [];
+    let selectedIds = new Set();
+    let editingId = null;
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+    const appNameInput = document.getElementById('appName');
+    const appNumberInput = document.getElementById('appNumber');
+    const appBundleInput = document.getElementById('appBundle');
+    const addBtn = document.getElementById('addBtn');
+    const searchBar = document.getElementById('searchBar');
+    const listContainer = document.getElementById('listContainer');
+    const totalCountSpan = document.getElementById('totalCount');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
 
-        let apps = JSON.parse(localStorage.getItem('moderation_dashboard_apps')) || [];
+    // Умная вставка данных при вводе в основную длинную строку
+    appNameInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        // Паттерн для поиска формата типа: #274 MatchPulse |com.matchpulse.soccer.live|
+        const match = val.match(/^#?(\d+)\s+([^|]+?)\s*\|([^|]+)\|/);
+        
+        if (match) {
+            appNumberInput.value = match[1];
+            appNameInput.value = match[2].trim();
+            appBundleInput.value = match[3].trim();
+        }
+    });
 
-        // Улучшенный парсер: триггерится только на палки |, чтобы не мешать писать руками
-        function detectSmartPaste(inputElement) {
-            const val = inputElement.value;
-            
-            if (val.includes('|')) {
-                let text = val.trim();
-                let number = "";
-                let bundle = "";
+    // Функция отрисовки (Новые сверху, старые снизу)
+    function renderList() {
+        listContainer.innerHTML = '';
+        const searchKeyword = searchBar.value.toLowerCase().trim();
 
-                // 1. Вытаскиваем бандл из палок |...|
-                const pipeMatch = text.match(/\|([^|]+)\|/);
-                if (pipeMatch) {
-                    bundle = pipeMatch[1].trim();
-                    text = text.replace(/\|[^|]+\|/, '').trim();
-                }
+        // Фильтруем элементы по поиску
+        const filteredApps = appList.filter(app => {
+            return (app.name.toLowerCase().includes(searchKeyword) ||
+                    app.number.toLowerCase().includes(searchKeyword) ||
+                    app.bundle.toLowerCase().includes(searchKeyword));
+        });
 
-                // 2. Вытаскиваем номер карточки
-                const numMatch = text.match(/^#?(\d+)/);
-                if (numMatch) {
-                    number = numMatch[1].trim();
-                    text = text.replace(/^#?(\d+)/, '').trim();
-                }
+        totalCountSpan.textContent = filteredApps.length;
 
-                // 3. Остаток — чистое название
-                let name = text.trim();
-
-                if (number) document.getElementById('appNumber').value = number;
-                if (bundle) document.getElementById('appBundle').value = bundle;
-                if (name) inputElement.value = name;
-            }
+        if (filteredApps.length === 0) {
+            listContainer.innerHTML = '<div class="empty-mock">Список пуст или ничего не найдено</div>';
+            updateBulkButtonsVisibility(filteredApps);
+            return;
         }
 
-        function addApp() {
-            const numInput = document.getElementById('appNumber');
-            const nameInput = document.getElementById('appName');
-            const bundleInput = document.getElementById('appBundle');
-            
-            const number = numInput.value.trim() || "—";
-            const name = nameInput.value.trim();
-            const bundle = bundleInput.value.trim();
+        // РАЗВОРАЧИВАЕМ МАССИВ: новые элементы падают наверх страницы
+        const displayedApps = [...filteredApps].reverse();
 
-            if (!name || !bundle) {
-                alert('Название и бандл обязательны!');
-                return;
-            }
+        displayedApps.forEach(app => {
+            const isChecked = selectedIds.has(app.id);
 
-            const newApp = {
-                id: Date.now(),
-                number: number,
-                name: name,
-                bundle: bundle
-            };
-
-            apps.push(newApp);
-            localStorage.setItem('moderation_dashboard_apps', JSON.stringify(apps));
-
-            numInput.value = '';
-            nameInput.value = '';
-            bundleInput.value = '';
-
-            renderList();
-        }
-
-        function editApp(id) {
-            const app = apps.find(a => a.id === id);
-            if (!app) return;
-
-            const currentNum = app.number || "—";
-            const newNum = prompt("Изменить номер карточки:", currentNum);
-            if (newNum === null) return;
-
-            const newName = prompt("Изменить название приложения:", app.name);
-            if (newName === null) return;
-
-            const newBundle = prompt("Изменить бандл:", app.bundle);
-            if (newBundle === null) return;
-
-            app.number = newNum.trim() || "—";
-            app.name = newName.trim() || app.name;
-            app.bundle = newBundle.trim() || app.bundle;
-
-            localStorage.setItem('moderation_dashboard_apps', JSON.stringify(apps));
-            renderList();
-        }
-
-        function deleteApp(id) {
-            apps = apps.filter(app => app.id !== id);
-            localStorage.setItem('moderation_dashboard_apps', JSON.stringify(apps));
-            renderList();
-        }
-
-        function renderList() {
-            const listDiv = document.getElementById('appList');
-            if (!listDiv) return;
-            
-            const searchQuery = document.getElementById('searchBar').value.toLowerCase().trim();
-            listDiv.innerHTML = '';
-
-            // Безопасная фильтрация (защита от краша на старых данных)
-            const filteredApps = apps.filter(app => {
-                const num = (app.number || "—").toString().toLowerCase();
-                const name = (app.name || "").toString().toLowerCase();
-                const bundle = (app.bundle || "").toString().toLowerCase();
-                
-                return name.includes(searchQuery) || 
-                       bundle.includes(searchQuery) || 
-                       num.includes(searchQuery);
-            });
-
-            document.getElementById('totalCount').innerText = apps.length;
-
-            if (filteredApps.length === 0) {
-                listDiv.innerHTML = '<div style="color: #7e92a4; font-size: 13px; margin-left: 4px; font-style: italic;">Список пуст...</div>';
-                return;
-            }
-
-            filteredApps.forEach(app => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                const appNum = app.number || "—";
-                const url = `https://play.google.com/store/apps/details?id=${app.bundle}`;
-
-                card.innerHTML = `
-                    <div class="card-number">#${appNum}</div>
-                    
-                    <a href="${url}" target="_blank" class="card-main-link">
-                        <div class="card-name">${app.name}</div>
-                        <div class="card-bundle">${app.bundle}</div>
-                    </a>
-                    
-                    <div class="card-actions">
-                        <button class="action-btn edit-btn" onclick="editApp(${app.id})" title="Изменить">
-                            <svg width="16" height="16" viewBox="0 0 24 24">
-                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                            </svg>
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deleteApp(${app.id})" title="Удалить">
-                            <svg width="16" height="16" viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
-                        </button>
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <label class="checkbox-container">
+                    <input type="checkbox" class="item-checkbox" data-id="${app.id}" ${isChecked ? 'checked' : ''}>
+                    <span class="custom-checkbox"></span>
+                </label>
+                <div class="item-info">
+                    <div class="item-header">
+                        <span class="item-num">${app.number ? '#' + app.number : '#__'}</span>
+                        <span class="item-name">${app.name}</span>
                     </div>
-                `;
-                listDiv.appendChild(card);
+                    <div class="item-bundle">${app.bundle || 'нет бандла'}</div>
+                </div>
+                <div class="item-actions">
+                    <button class="action-btn btn-edit" onclick="editItem('${app.id}')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                    </button>
+                    <button class="action-btn btn-delete" onclick="deleteItem('${app.id}')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                    </button>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+
+        updateBulkButtonsVisibility(filteredApps);
+    }
+
+    // Слушатель событий клика на чекбоксы плашек
+    listContainer.addEventListener('change', (e) => {
+        if (e.target.classList.contains('item-checkbox')) {
+            const id = e.target.getAttribute('data-id');
+            if (e.target.checked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+            const currentFilteredCount = appList.filter(app => {
+                const keyword = searchBar.value.toLowerCase().trim();
+                return app.name.toLowerCase().includes(keyword) || app.number.toLowerCase().includes(keyword) || app.bundle.toLowerCase().includes(keyword);
             });
+            updateBulkButtonsVisibility(currentFilteredCount);
+        }
+    });
+
+    // Кнопка Выбрать все / Снять выделение (работает по текущему фильтру поиска)
+    selectAllBtn.addEventListener('click', () => {
+        const searchKeyword = searchBar.value.toLowerCase().trim();
+        const filteredApps = appList.filter(app => {
+            return app.name.toLowerCase().includes(searchKeyword) || app.number.toLowerCase().includes(searchKeyword) || app.bundle.toLowerCase().includes(searchKeyword);
+        });
+
+        const allFilteredSelected = filteredApps.every(app => selectedIds.has(app.id));
+
+        if (allFilteredSelected) {
+            // Если все и так выбраны — снимаем выделение конкретно с отфильтрованных
+            filteredApps.forEach(app => selectedIds.delete(app.id));
+        } else {
+            // Иначе выделяем все отфильтрованные
+            filteredApps.forEach(app => selectedIds.add(app.id));
+        }
+        renderList();
+    });
+
+    // Управление видимостью кнопки удаления и текстом кнопки "Выбрать все"
+    function updateBulkButtonsVisibility(currentFilteredApps) {
+        const selectedFilteredCount = currentFilteredApps.filter(app => selectedIds.has(app.id)).length;
+
+        if (selectedFilteredCount > 0) {
+            deleteSelectedBtn.style.display = 'block';
+            deleteSelectedBtn.textContent = `Удалить выбранные (${selectedFilteredCount})`;
+        } else {
+            deleteSelectedBtn.style.display = 'none';
         }
 
+        if (currentFilteredApps.length > 0 && currentFilteredApps.every(app => selectedIds.has(app.id))) {
+            selectAllBtn.textContent = 'Снять выбор';
+        } else {
+            selectAllBtn.textContent = 'Выбрать все';
+        }
+    }
+
+    // Удаление выбранных пачкой
+    deleteSelectedBtn.addEventListener('click', () => {
+        if (confirm(`Удалить выбранные элементы (${selectedIds.size} шт.)?`)) {
+            appList = appList.filter(app => !selectedIds.has(app.id));
+            selectedIds.clear();
+            saveAndRefresh();
+        }
+    });
+
+    // Добавление или обновление элемента
+    addBtn.addEventListener('click', () => {
+        const name = appNameInput.value.trim();
+        const number = appNumberInput.value.trim();
+        const bundle = appBundleInput.value.trim();
+
+        if (!name) {
+            alert('Поле названия не должно быть пустым!');
+            return;
+        }
+
+        if (editingId) {
+            // Редактирование существующего
+            appList = appList.map(app => app.id === editingId ? { ...app, name, number, bundle } : app);
+            editingId = null;
+            addBtn.textContent = 'Добавить в список';
+            addBtn.style.backgroundColor = '#2481cc';
+        } else {
+            // Создание нового элемента
+            const newApp = {
+                id: Date.now().toString(),
+                name,
+                number,
+                bundle
+            };
+            appList.push(newApp);
+        }
+
+        appNameInput.value = '';
+        appNumberInput.value = '';
+        appBundleInput.value = '';
+        saveAndRefresh();
+    });
+
+    // Функция перевода элемента в режим редактирования
+    window.editItem = function(id) {
+        const item = appList.find(app => app.id === id);
+        if (item) {
+            appNameInput.value = item.name;
+            appNumberInput.value = item.number;
+            appBundleInput.value = item.bundle;
+            editingId = id;
+            addBtn.textContent = 'Сохранить изменения';
+            addBtn.style.backgroundColor = '#e5a93c';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    // Одиночное удаление
+    window.deleteItem = function(id) {
+        appList = appList.filter(app => app.id !== id);
+        selectedIds.delete(id);
+        if (editingId === id) {
+            editingId = null;
+            addBtn.textContent = 'Добавить в список';
+            addBtn.style.backgroundColor = '#2481cc';
+            appNameInput.value = '';
+            appNumberInput.value = '';
+            appBundleInput.value = '';
+        }
+        saveAndRefresh();
+    };
+
+    searchBar.addEventListener('input', renderList);
+
+    function saveAndRefresh() {
+        localStorage.setItem('moderation_apps', JSON.stringify(appList));
         renderList();
-    </script>
+    }
+
+    // Первый запуск
+    renderList();
+</script>
+
 </body>
 </html>
