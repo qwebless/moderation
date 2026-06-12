@@ -40,11 +40,11 @@
         }
 
         .form-row .group-num {
-            flex: 0 0 25%; /* Маленькое поле для номера */
+            flex: 0 0 25%;
         }
 
         .form-row .group-bundle {
-            flex: 1; /* Поле бандла забирает всё оставшееся место */
+            flex: 1;
         }
 
         label {
@@ -95,7 +95,6 @@
             background-color: #2a96e8;
         }
 
-        /* Панель управления поиском и массовыми действиями */
         .controls-panel {
             display: flex;
             flex-direction: column;
@@ -109,6 +108,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 32px;
         }
 
         .total-badge {
@@ -125,28 +125,6 @@
             width: 100%;
         }
 
-        .bulk-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .btn-secondary {
-            background-color: #242f3d;
-            color: #7993b0;
-            border: 1px solid #3b4b5e;
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .btn-secondary:hover {
-            color: #fff;
-            border-color: #52667a;
-        }
-
         .btn-danger-bulk {
             background-color: #ca3a3a;
             color: #fff;
@@ -156,14 +134,13 @@
             font-size: 12px;
             cursor: pointer;
             font-weight: bold;
-            display: none; /* Показываем только когда выбрано > 0 */
+            display: none;
         }
 
         .btn-danger-bulk:hover {
             background-color: #e54343;
         }
 
-        /* Список плашек */
         .list-container {
             display: flex;
             flex-direction: column;
@@ -186,11 +163,11 @@
             background-color: #2b394a;
         }
 
-        /* Кастомный чекбокс */
         .checkbox-container {
             display: inline-flex;
             align-items: center;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .checkbox-container input {
@@ -224,17 +201,14 @@
             transform: rotate(45deg);
         }
 
-        .item-info {
+        /* Кликабельная ссылка-обертка для внутренностей карточки */
+        .item-link-wrapper {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .item-header {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            min-width: 0;
         }
 
         .item-num {
@@ -242,6 +216,17 @@
             font-weight: bold;
             font-size: 14px;
             white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .item-text-center {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 0 15px;
+            min-width: 0;
         }
 
         .item-name {
@@ -260,6 +245,7 @@
         .item-actions {
             display: flex;
             gap: 6px;
+            flex-shrink: 0;
         }
 
         .action-btn {
@@ -292,17 +278,17 @@
 
 <div class="container">
     <div class="form-group">
-        <label for="appName">Название / Умная вставка:</label>
+        <label for="appName">Название / Умная вставка</label>
         <input type="text" id="appName" placeholder="Вставь строку или имя">
     </div>
 
     <div class="form-row">
         <div class="group-num">
-            <label for="appNumber">№:</label>
+            <label for="appNumber">№</label>
             <input type="text" id="appNumber" placeholder="25">
         </div>
         <div class="group-bundle">
-            <label for="appBundle">Бандл:</label>
+            <label for="appBundle">Бандл</label>
             <input type="text" id="appBundle" placeholder="com.company.app">
         </div>
     </div>
@@ -311,11 +297,8 @@
 
     <div class="controls-panel">
         <div class="panel-top">
-            <div class="total-badge">ВСЕГО: <span id="totalCount">0</span></div>
-            <div class="bulk-actions">
-                <button id="selectAllBtn" class="btn-secondary">Выбрать все</button>
-                <button id="deleteSelectedBtn" class="btn-danger-bulk">Удалить выбранные (0)</button>
-            </div>
+            <div class="total-badge">ВСЕГО <span id="totalCount">0</span></div>
+            <button id="deleteSelectedBtn" class="btn-danger-bulk">Удалить выбранные (0)</button>
         </div>
         <div class="search-wrapper">
             <input type="text" id="searchBar" placeholder="🔍 Поиск по номеру, имени или бандлу...">
@@ -337,13 +320,21 @@
     const searchBar = document.getElementById('searchBar');
     const listContainer = document.getElementById('listContainer');
     const totalCountSpan = document.getElementById('totalCount');
-    const selectAllBtn = document.getElementById('selectAllBtn');
     const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
 
-    // Умная вставка данных при вводе в основную длинную строку
+    // Фикс 1: Активация и отправка по нажатию на Enter в любом поле ввода
+    [appNameInput, appNumberInput, appBundleInput].forEach(input => {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Предотвращаем стандартный сабмит
+                addBtn.click(); // Имитируем клик по кнопке добавления
+            }
+        });
+    });
+
+    // Умный парсер строки
     appNameInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
-        // Паттерн для поиска формата типа: #274 MatchPulse |com.matchpulse.soccer.live|
         const match = val.match(/^#?(\d+)\s+([^|]+?)\s*\|([^|]+)\|/);
         
         if (match) {
@@ -353,12 +344,11 @@
         }
     });
 
-    // Функция отрисовки (Новые сверху, старые снизу)
+    // Фикс 2, 5 и 6: Отрисовка списка с новым дизайном и ссылкой на Google Play
     function renderList() {
         listContainer.innerHTML = '';
         const searchKeyword = searchBar.value.toLowerCase().trim();
 
-        // Фильтруем элементы по поиску
         const filteredApps = appList.filter(app => {
             return (app.name.toLowerCase().includes(searchKeyword) ||
                     app.number.toLowerCase().includes(searchKeyword) ||
@@ -373,7 +363,6 @@
             return;
         }
 
-        // РАЗВОРАЧИВАЕМ МАССИВ: новые элементы падают наверх страницы
         const displayedApps = [...filteredApps].reverse();
 
         displayedApps.forEach(app => {
@@ -386,13 +375,16 @@
                     <input type="checkbox" class="item-checkbox" data-id="${app.id}" ${isChecked ? 'checked' : ''}>
                     <span class="custom-checkbox"></span>
                 </label>
-                <div class="item-info">
-                    <div class="item-header">
-                        <span class="item-num">${app.number ? '#' + app.number : '#__'}</span>
+                
+                <a href="https://play.google.com/store/apps/details?id=${app.bundle}" target="_blank" class="item-link-wrapper">
+                    <span class="item-num">${app.number ? '#' + app.number : '#__'}</span>
+                    
+                    <div class="item-text-center">
                         <span class="item-name">${app.name}</span>
+                        <span class="item-bundle">${app.bundle || 'нет бандла'}</span>
                     </div>
-                    <div class="item-bundle">${app.bundle || 'нет бандла'}</div>
-                </div>
+                </a>
+                
                 <div class="item-actions">
                     <button class="action-btn btn-edit" onclick="editItem('${app.id}')">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
@@ -408,7 +400,6 @@
         updateBulkButtonsVisibility(filteredApps);
     }
 
-    // Слушатель событий клика на чекбоксы плашек
     listContainer.addEventListener('change', (e) => {
         if (e.target.classList.contains('item-checkbox')) {
             const id = e.target.getAttribute('data-id');
@@ -425,44 +416,16 @@
         }
     });
 
-    // Кнопка Выбрать все / Снять выделение (работает по текущему фильтру поиска)
-    selectAllBtn.addEventListener('click', () => {
-        const searchKeyword = searchBar.value.toLowerCase().trim();
-        const filteredApps = appList.filter(app => {
-            return app.name.toLowerCase().includes(searchKeyword) || app.number.toLowerCase().includes(searchKeyword) || app.bundle.toLowerCase().includes(searchKeyword);
-        });
-
-        const allFilteredSelected = filteredApps.every(app => selectedIds.has(app.id));
-
-        if (allFilteredSelected) {
-            // Если все и так выбраны — снимаем выделение конкретно с отфильтрованных
-            filteredApps.forEach(app => selectedIds.delete(app.id));
-        } else {
-            // Иначе выделяем все отфильтрованные
-            filteredApps.forEach(app => selectedIds.add(app.id));
-        }
-        renderList();
-    });
-
-    // Управление видимостью кнопки удаления и текстом кнопки "Выбрать все"
     function updateBulkButtonsVisibility(currentFilteredApps) {
         const selectedFilteredCount = currentFilteredApps.filter(app => selectedIds.has(app.id)).length;
-
         if (selectedFilteredCount > 0) {
             deleteSelectedBtn.style.display = 'block';
             deleteSelectedBtn.textContent = `Удалить выбранные (${selectedFilteredCount})`;
         } else {
             deleteSelectedBtn.style.display = 'none';
         }
-
-        if (currentFilteredApps.length > 0 && currentFilteredApps.every(app => selectedIds.has(app.id))) {
-            selectAllBtn.textContent = 'Снять выбор';
-        } else {
-            selectAllBtn.textContent = 'Выбрать все';
-        }
     }
 
-    // Удаление выбранных пачкой
     deleteSelectedBtn.addEventListener('click', () => {
         if (confirm(`Удалить выбранные элементы (${selectedIds.size} шт.)?`)) {
             appList = appList.filter(app => !selectedIds.has(app.id));
@@ -471,7 +434,7 @@
         }
     });
 
-    // Добавление или обновление элемента
+    // Добавление и проверка на дубликаты бандлов
     addBtn.addEventListener('click', () => {
         const name = appNameInput.value.trim();
         const number = appNumberInput.value.trim();
@@ -481,15 +444,25 @@
             alert('Поле названия не должно быть пустым!');
             return;
         }
+        if (!bundle) {
+            alert('Поле бандла не должно быть пустым!');
+            return;
+        }
+
+        // Фикс 3: Проверка на одинаковые бандлы (проверяем регистр букв на всякий случай)
+        const isDuplicateBundle = appList.some(app => app.bundle.toLowerCase() === bundle.toLowerCase() && app.id !== editingId);
+        
+        if (isDuplicateBundle) {
+            alert(`Ошибка: Приложение с бандлом "${bundle}" уже добавлено в список!`);
+            return;
+        }
 
         if (editingId) {
-            // Редактирование существующего
             appList = appList.map(app => app.id === editingId ? { ...app, name, number, bundle } : app);
             editingId = null;
             addBtn.textContent = 'Добавить в список';
             addBtn.style.backgroundColor = '#2481cc';
         } else {
-            // Создание нового элемента
             const newApp = {
                 id: Date.now().toString(),
                 name,
@@ -505,7 +478,6 @@
         saveAndRefresh();
     });
 
-    // Функция перевода элемента в режим редактирования
     window.editItem = function(id) {
         const item = appList.find(app => app.id === id);
         if (item) {
@@ -519,7 +491,6 @@
         }
     };
 
-    // Одиночное удаление
     window.deleteItem = function(id) {
         appList = appList.filter(app => app.id !== id);
         selectedIds.delete(id);
@@ -541,7 +512,6 @@
         renderList();
     }
 
-    // Первый запуск
     renderList();
 </script>
 
