@@ -43,34 +43,42 @@
             max-width: 500px;
             background-color: #17212b;
             padding: 20px;
-            border-radius: 26px; /* Скругление 45% от макс */
+            border-radius: 26px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             margin-bottom: 15px;
         }
 
-        .form-group {
+        /* Новая двухрядная структура формы */
+        .form-row-top {
+            display: flex;
+            gap: 10px;
             margin-bottom: 12px;
         }
 
-        .form-row {
+        .form-row-top .group-name {
+            flex: 2; /* Название шире */
+            min-width: 0;
+        }
+
+        .form-row-top .group-select {
+            flex: 1; /* Список аккуратно и нормально встает справа сверху */
+            min-width: 0;
+        }
+
+        .form-row-bottom {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
 
-        /* Пропорции окон: Левое и правое одинаковые, центральное чуть больше */
-        .form-row .group-num {
+        .form-row-bottom .group-num {
             flex: 1;
+            max-width: 80px; /* Ограничиваем номер, как в старой версии */
             min-width: 0;
         }
 
-        .form-row .group-select {
-            flex: 1.3;
-            min-width: 0;
-        }
-
-        .form-row .group-bundle {
-            flex: 1;
+        .form-row-bottom .group-bundle {
+            flex: 4; /* Возвращаем бандлу максимум пространства */
             min-width: 0;
         }
 
@@ -88,7 +96,7 @@
             width: 100%;
             background-color: #101721;
             border: 1px solid #243143;
-            border-radius: 16px; /* Скругление инпутов */
+            border-radius: 16px;
             padding: 12px 16px;
             color: #fff;
             font-size: 14px;
@@ -207,7 +215,7 @@
             padding-right: 8px;
         }
 
-        /* Стили для заголовков раскрывающихся списков */
+        /* Стили заголовков аккордеона */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -256,13 +264,13 @@
             display: none;
         }
 
-        /* Стили карточек приложений */
+        /* Стили карточек */
         .item-card {
             background-color: #24303f;
-            border-radius: 22px; /* Красивые круглые углы */
+            border-radius: 22px;
             padding: 14px 16px;
             display: flex;
-            align-items: center; /* Центрирование абсолютно всех элементов */
+            align-items: center;
             gap: 14px;
         }
 
@@ -276,7 +284,7 @@
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
-            align-self: center; /* Жесткое центрирование */
+            align-self: center;
         }
 
         .checkbox-container input {
@@ -301,7 +309,7 @@
         .item-link-wrapper {
             flex: 1;
             display: flex;
-            align-items: center; /* Центрирование контента внутри ссылки */
+            align-items: center;
             text-decoration: none;
             color: inherit;
             min-width: 0;
@@ -315,7 +323,7 @@
             flex-shrink: 0;
             display: flex;
             align-items: center;
-            align-self: center; /* Жесткое центрирование */
+            align-self: center;
         }
 
         .item-text-center {
@@ -323,7 +331,7 @@
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 6px; /* Чуть увеличенный зазор между названием и бандлом */
+            gap: 6px;
             padding: 0 15px;
             min-width: 0;
         }
@@ -337,8 +345,8 @@
         }
 
         .item-bundle {
-            font-size: 13px; /* Крупнее, как просил */
-            color: #8ea3b8; /* Более контрастный и заметный цвет */
+            font-size: 13px;
+            color: #8ea3b8;
             word-break: break-word;
             line-height: 1.2;
         }
@@ -348,7 +356,7 @@
             gap: 6px;
             flex-shrink: 0;
             align-items: center;
-            align-self: center; /* Жесткое центрирование */
+            align-self: center;
         }
 
         .action-btn {
@@ -380,15 +388,10 @@
 <body>
 
 <div class="container">
-    <div class="form-group">
-        <label for="appName">Название / Умная вставка</label>
-        <input type="text" id="appName" placeholder="Вставь строку или имя">
-    </div>
-
-    <div class="form-row">
-        <div class="group-num">
-            <label for="appNumber">№</label>
-            <input type="text" id="appNumber" placeholder="25">
+    <div class="form-row-top">
+        <div class="group-name">
+            <label for="appName">Название / Умная вставка</label>
+            <input type="text" id="appName" placeholder="Вставь строку или имя">
         </div>
         <div class="group-select">
             <label for="appListType">Список</label>
@@ -397,6 +400,13 @@
                 <option value="update">update</option>
                 <option value="design">design</option>
             </select>
+        </div>
+    </div>
+
+    <div class="form-row-bottom">
+        <div class="group-num">
+            <label for="appNumber">№</label>
+            <input type="text" id="appNumber" placeholder="25">
         </div>
         <div class="group-bundle">
             <label for="appBundle">Бандл</label>
@@ -431,7 +441,6 @@
     let editingId = null;
     let activeCardId = null;
 
-    // Хранение состояния раскрытых списков (по умолчанию все раскрыты)
     let collapsedSections = JSON.parse(localStorage.getItem('collapsed_sections')) || {
         moderation: false,
         update: false,
@@ -459,7 +468,7 @@
         });
     });
 
-    // Умный парсер вставки строк
+    // Умная вставка
     appNameInput.addEventListener('input', (e) => {
         let val = e.target.value.replace(/\r?\n|\r/g, ' ').trim();
         const bundleRegex = /([a-zA-Z0-9_-]+\.[a-zA-Z0-9._-]+)/;
@@ -486,7 +495,7 @@
         }
     });
 
-    // Экспорт с учетом выбранного списка
+    // Бэкап экспорта
     exportBtn.addEventListener('click', () => {
         if (appList.length === 0) {
             alert('Список пуст, экспортировать нечего!');
@@ -502,7 +511,7 @@
         });
     });
 
-    // Импорт с поддержкой старого и нового форматов
+    // Бэкап импорта
     importBtn.addEventListener('click', () => {
         const str = prompt('Вставь текст бэкапа:');
         if (!str || !str.trim()) return;
@@ -517,7 +526,7 @@
                     number: parts[0].trim(),
                     name: parts[1].trim(),
                     bundle: parts[2].trim(),
-                    listType: parts[3] ? parts[3].trim() : 'moderation' // Старые бэкапы падают в moderation
+                    listType: parts[3] ? parts[3].trim() : 'moderation'
                 };
             });
             
@@ -533,9 +542,8 @@
         }
     });
 
-    // МГНОВЕННЫЙ ХЕНДЛЕР НА НАЖАТИЕ ЛКМ ИЛИ КОЛЕСИКА МЫШИ (auxclick / mousedown)
+    // Обработка клика (ЛКМ и Колесико мыши) на mousedown
     document.addEventListener('mousedown', (e) => {
-        // e.button === 0 (ЛКМ), e.button === 1 (Колёсико мыши)
         if (e.button !== 0 && e.button !== 1) return;
 
         const linkWrapper = e.target.closest('.item-link-wrapper');
@@ -559,7 +567,6 @@
                 newCard.classList.add('active-clicked');
             }
         } else if (!actionBtn && !checkbox && !backupBtn && !primaryBtn && !inputField && !selectField && !sectionHeader) {
-            // Если кликнули мимо всего важного, сбрасываем серый фокус
             if (activeCardId) {
                 const oldCard = document.querySelector(`.item-card[data-id="${activeCardId}"]`);
                 if (oldCard) oldCard.classList.remove('active-clicked');
@@ -568,7 +575,6 @@
         }
     });
 
-    // Функция переключения видимости секции списков
     window.toggleSection = function(sectionName) {
         collapsedSections[sectionName] = !collapsedSections[sectionName];
         localStorage.setItem('collapsed_sections', JSON.stringify(collapsedSections));
@@ -579,7 +585,6 @@
         listContainer.innerHTML = '';
         const searchKeyword = searchBar.value.toLowerCase().trim();
 
-        // Фильтруем весь массив по поисковому слову
         const filteredApps = appList.filter(app => {
             return (app.name.toLowerCase().includes(searchKeyword) ||
                     app.number.toLowerCase().includes(searchKeyword) ||
@@ -588,17 +593,13 @@
 
         totalCountSpan.textContent = filteredApps.length;
 
-        // Создаем три предопределенные категории
         const categories = ['moderation', 'update', 'design'];
 
         categories.forEach(cat => {
-            // Берем элементы текущей категории и переворачиваем, чтобы новые были сверху
             const catApps = filteredApps.filter(app => (app.listType || 'moderation') === cat);
             const displayedApps = [...catApps].reverse();
-
             const isCollapsed = collapsedSections[cat];
 
-            // Создаем заголовок секции
             const header = document.createElement('div');
             header.className = `section-header ${isCollapsed ? 'collapsed' : ''}`;
             header.setAttribute('onclick', `toggleSection('${cat}')`);
@@ -608,7 +609,6 @@
             `;
             listContainer.appendChild(header);
 
-            // Создаем контейнер для карточек внутри секции
             const contentDiv = document.createElement('div');
             contentDiv.className = `section-content ${isCollapsed ? 'collapsed' : ''}`;
             contentDiv.id = `section-${cat}`;
@@ -655,7 +655,6 @@
         updateBulkButtonsVisibility(filteredApps);
     }
 
-    // Отслеживание чекбоксов массового удаления
     listContainer.addEventListener('change', (e) => {
         if (e.target.classList.contains('item-checkbox')) {
             const id = e.target.getAttribute('data-id');
@@ -691,7 +690,6 @@
         }
     });
 
-    // Добавление / Сохранение изменений
     addBtn.addEventListener('click', () => {
         const name = appNameInput.value.trim();
         const number = appNumberInput.value.trim();
@@ -750,7 +748,7 @@
     };
 
     window.deleteItem = function(id) {
-        appList = appList.filter(app => app.id !== id);
+        appList = appList.filter(app => !id.includes(app.id));
         selectedIds.delete(id);
         if (activeCardId === id) activeCardId = null;
         if (editingId === id) {
@@ -771,7 +769,6 @@
         renderList();
     }
 
-    // Первый запуск рендера
     renderList();
 </script>
 
