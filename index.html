@@ -12,7 +12,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Кастомный главный скроллбар для всей страницы */
+        /* Кастомный правый скроллбар */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -43,7 +43,7 @@
             max-width: 500px;
             background-color: #17212b;
             padding: 20px;
-            border-radius: 16px; /* Более мягкое скругление */
+            border-radius: 26px; /* Максимально сглаженные углы */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             margin-bottom: 15px;
         }
@@ -80,8 +80,8 @@
             width: 100%;
             background-color: #101721;
             border: 1px solid #243143;
-            border-radius: 12px; /* Идеальный баланс углов */
-            padding: 12px;
+            border-radius: 16px; /* Круглые углы для инпутов */
+            padding: 12px 16px;
             color: #fff;
             font-size: 14px;
             outline: none;
@@ -101,7 +101,7 @@
             background-color: #2481cc;
             color: #ffffff;
             border: none;
-            border-radius: 12px; /* Сглаженные углы */
+            border-radius: 16px; /* Круглые углы для кнопок */
             padding: 14px;
             font-size: 15px;
             font-weight: bold;
@@ -125,7 +125,7 @@
             background-color: #243143;
             color: #7993b0;
             border: 1px solid #2b394a;
-            border-radius: 10px; /* Идеальный баланс */
+            border-radius: 12px;
             padding: 8px;
             font-size: 12px;
             font-weight: bold;
@@ -190,28 +190,27 @@
             gap: 10px;
             max-height: 65vh;
             overflow-y: auto;
-            padding-right: 12px; /* Дали пространства скроллбару от карточек */
+            padding-right: 12px;
         }
 
         .item-card {
             background-color: #24303f;
-            border-radius: 14px; /* Красивое среднее скругление */
-            padding: 12px;
+            border-radius: 22px; /* Красивые круглые углы карточек */
+            padding: 14px 16px;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: background-color 3s ease-out; /* Плавное затухание за 3 секунды */
+            align-items: center; /* Строгое выравнивание всех элементов по центру */
+            gap: 14px;
+            transition: background-color 3s ease-out;
         }
 
-        /* Стиль для последней активной открытой карточки */
         .item-card.active-clicked {
             background-color: #111822 !important;
-            transition: none !important; /* Держится серой без таймера */
+            transition: none !important;
         }
 
         .checkbox-container {
             display: flex;
-            align-items: center; /* Четкое выравнивание по центру с номером */
+            align-items: center; /* Центрирование кружка внутри своего контейнера */
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
@@ -221,27 +220,25 @@
             display: none;
         }
 
-        /* Превратили квадрат в круг без галочек */
         .custom-checkbox {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border: 2px solid #52667a;
-            border-radius: 50%; /* Идеальный круг */
+            border-radius: 50%;
             display: block;
             background-color: #101721;
             transition: background-color 0.2s, border-color 0.2s;
         }
 
-        /* При выборе заливается зеленым цветом */
         .checkbox-container input:checked + .custom-checkbox {
-            background-color: #2ecc71; /* Приятный зеленый */
+            background-color: #2ecc71;
             border-color: #2ecc71;
         }
 
         .item-link-wrapper {
             flex: 1;
             display: flex;
-            align-items: center;
+            align-items: center; /* Центрирование номера и текстов по одной линии */
             text-decoration: none;
             color: inherit;
             min-width: 0;
@@ -262,28 +259,31 @@
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 6px; /* Увеличили расстояние между названием и бандлом */
             padding: 0 15px;
             min-width: 0;
         }
 
         .item-name {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             color: #ffffff;
             word-break: break-word;
+            line-height: 1.2;
         }
 
         .item-bundle {
-            font-size: 11px;
-            color: #7993b0;
+            font-size: 13px; /* Сделали крупнее и читаемее */
+            color: #8ea3b8; /* Более контрастный цвет, теперь отлично видно */
             word-break: break-word;
+            line-height: 1.2;
         }
 
         .item-actions {
             display: flex;
             gap: 6px;
             flex-shrink: 0;
+            align-items: center;
         }
 
         .action-btn {
@@ -355,7 +355,7 @@
     let appList = JSON.parse(localStorage.getItem('moderation_apps')) || [];
     let selectedIds = new Set();
     let editingId = null;
-    let activeCardId = null; // Трекер последней открытой карточки
+    let activeCardId = null;
 
     const appNameInput = document.getElementById('appName');
     const appNumberInput = document.getElementById('appNumber');
@@ -377,25 +377,34 @@
         });
     });
 
+    // Полностью обновленный неубиваемый парсер умной вставки
     appNameInput.addEventListener('input', (e) => {
         let val = e.target.value.replace(/\r?\n|\r/g, ' ').trim();
         
-        const numMatch = val.match(/^#?(\d+)/);
-        const bundleMatch = val.match(/([a-zA-Z0-9_-]+\.[a-zA-Z0-9._-]+)/g);
+        // Регулярка для поиска любого бандла в строке
+        const bundleRegex = /([a-zA-Z0-9_-]+\.[a-zA-Z0-9._-]+)/;
+        const bundleMatch = val.match(bundleRegex);
         
-        if (numMatch && bundleMatch && bundleMatch.length > 0) {
+        // Регулярка для поиска номера (сначала ищем в начале строки, если нет - любое число отдельно)
+        let numMatch = val.match(/^#?(\d+)/);
+        if (!numMatch) {
+            numMatch = val.match(/\b(\d+)\b/);
+        }
+        
+        if (numMatch && bundleMatch) {
             const num = numMatch[1];
-            const bundle = bundleMatch[bundleMatch.length - 1].trim();
+            const bundle = bundleMatch[1].trim();
             
-            let namePart = val.substring(numMatch[0].length);
+            // Чистим название от вырезанного номера и бандла
+            let name = val;
+            name = name.replace(numMatch[0], '');
+            name = name.replace(bundle, '');
             
-            const bundleIndex = namePart.lastIndexOf(bundle);
-            if (bundleIndex !== -1) {
-                namePart = namePart.substring(0, bundleIndex);
-            }
+            // Удаляем разделители типа палочек, решеток и лишние пробелы
+            name = name.replace(/[|#]/g, ' ');
+            name = name.replace(/\s+/g, ' ').trim();
             
-            const name = namePart.replace(/^[\s|]+|[\s|]+$/g, '').trim();
-            
+            // Закидываем всё в инпуты
             appNumberInput.value = num;
             appBundleInput.value = bundle;
             appNameInput.value = name;
@@ -411,14 +420,14 @@
         const compactString = compactLines.join('\n');
         
         navigator.clipboard.writeText(compactString).then(() => {
-            alert(`База сжата до ${compactString.length} симв. и скопирована! В ТГ отправится без проблем.`);
+            alert(`База сжата до ${compactString.length} симв. и скопирована!`);
         }).catch(err => {
             alert('Ошибка буфера. Скопируй вручную из окна:\n\n' + compactString);
         });
     });
 
     importBtn.addEventListener('click', () => {
-        const str = prompt('Вставь текст бэкапа из Избранного:');
+        const str = prompt('Вставь текст бэкапа:');
         if (!str || !str.trim()) return;
         
         try {
@@ -439,14 +448,13 @@
                 selectedIds.clear();
                 activeCardId = null;
                 saveAndRefresh();
-                alert('База успешно импортирована и восстановлена!');
+                alert('База успешно импортирована!');
             }
         } catch (e) {
-            alert('Неверный формат данных! Убедись, что скопировал текст бэкапа полностью.');
+            alert('Неверный формат данных бэкапа!');
         }
     });
 
-    // Умная логика кликов: фиксация активной карточки и сброс при клике мимо
     document.addEventListener('click', (e) => {
         const linkWrapper = e.target.closest('.item-link-wrapper');
         const actionBtn = e.target.closest('.action-btn');
@@ -457,21 +465,16 @@
 
         if (linkWrapper) {
             const id = linkWrapper.getAttribute('data-id');
-            
-            // Снимаем класс со старой активной карточки
             if (activeCardId) {
                 const oldCard = document.querySelector(`.item-card[data-id="${activeCardId}"]`);
                 if (oldCard) oldCard.classList.remove('active-clicked');
             }
-            
-            // Назначаем новую активную карточку
             activeCardId = id;
             const newCard = linkWrapper.closest('.item-card');
             if (newCard) {
                 newCard.classList.add('active-clicked');
             }
         } else if (!actionBtn && !checkbox && !backupBtn && !primaryBtn && !inputField) {
-            // Кликнули в любое другое пустое место экрана — убираем фокус с затуханием в 3 секунды
             if (activeCardId) {
                 const oldCard = document.querySelector(`.item-card[data-id="${activeCardId}"]`);
                 if (oldCard) oldCard.classList.remove('active-clicked');
