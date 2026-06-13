@@ -43,7 +43,7 @@
             max-width: 500px;
             background-color: #17212b;
             padding: 20px;
-            border-radius: 26px; /* Максимально сглаженные углы */
+            border-radius: 26px; /* Скругление 45% от макс */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             margin-bottom: 15px;
         }
@@ -58,12 +58,20 @@
             margin-bottom: 15px;
         }
 
+        /* Пропорции окон: Левое и правое одинаковые, центральное чуть больше */
         .form-row .group-num {
-            flex: 0 0 25%;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-row .group-select {
+            flex: 1.3;
+            min-width: 0;
         }
 
         .form-row .group-bundle {
             flex: 1;
+            min-width: 0;
         }
 
         label {
@@ -76,11 +84,11 @@
             letter-spacing: 0.5px;
         }
 
-        input {
+        input, select {
             width: 100%;
             background-color: #101721;
             border: 1px solid #243143;
-            border-radius: 16px; /* Круглые углы для инпутов */
+            border-radius: 16px; /* Скругление инпутов */
             padding: 12px 16px;
             color: #fff;
             font-size: 14px;
@@ -88,7 +96,17 @@
             transition: border-color 0.2s;
         }
 
-        input:focus {
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237993b0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+
+        input:focus, select:focus {
             border-color: #3b88c3;
         }
 
@@ -101,7 +119,7 @@
             background-color: #2481cc;
             color: #ffffff;
             border: none;
-            border-radius: 16px; /* Круглые углы для кнопок */
+            border-radius: 16px;
             padding: 14px;
             font-size: 15px;
             font-weight: bold;
@@ -142,7 +160,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             padding-bottom: 15px;
             border-bottom: 1px solid #243143;
         }
@@ -164,10 +182,6 @@
             color: #2481cc;
         }
 
-        .search-wrapper {
-            width: 100%;
-        }
-
         .btn-danger-bulk {
             background-color: #ca3a3a;
             color: #fff;
@@ -187,33 +201,82 @@
         .list-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 5px;
             max-height: 65vh;
             overflow-y: auto;
-            padding-right: 12px;
+            padding-right: 8px;
         }
 
+        /* Стили для заголовков раскрывающихся списков */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a242f;
+            padding: 12px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+            user-select: none;
+            border: 1px solid #243143;
+            transition: background-color 0.2s;
+        }
+
+        .section-header:hover {
+            background-color: #202b3a;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #3b88c3;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .section-arrow {
+            font-size: 12px;
+            color: #7993b0;
+            transition: transform 0.2s ease;
+        }
+
+        .section-header.collapsed .section-arrow {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .section-content.collapsed {
+            display: none;
+        }
+
+        /* Стили карточек приложений */
         .item-card {
             background-color: #24303f;
-            border-radius: 22px; /* Красивые круглые углы карточек */
+            border-radius: 22px; /* Красивые круглые углы */
             padding: 14px 16px;
             display: flex;
-            align-items: center; /* Строгое выравнивание всех элементов по центру */
+            align-items: center; /* Центрирование абсолютно всех элементов */
             gap: 14px;
-            transition: background-color 3s ease-out;
         }
 
         .item-card.active-clicked {
             background-color: #111822 !important;
-            transition: none !important;
         }
 
         .checkbox-container {
             display: flex;
-            align-items: center; /* Центрирование кружка внутри своего контейнера */
+            align-items: center;
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
+            align-self: center; /* Жесткое центрирование */
         }
 
         .checkbox-container input {
@@ -238,7 +301,7 @@
         .item-link-wrapper {
             flex: 1;
             display: flex;
-            align-items: center; /* Центрирование номера и текстов по одной линии */
+            align-items: center; /* Центрирование контента внутри ссылки */
             text-decoration: none;
             color: inherit;
             min-width: 0;
@@ -252,6 +315,7 @@
             flex-shrink: 0;
             display: flex;
             align-items: center;
+            align-self: center; /* Жесткое центрирование */
         }
 
         .item-text-center {
@@ -259,7 +323,7 @@
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 6px; /* Увеличили расстояние между названием и бандлом */
+            gap: 6px; /* Чуть увеличенный зазор между названием и бандлом */
             padding: 0 15px;
             min-width: 0;
         }
@@ -273,8 +337,8 @@
         }
 
         .item-bundle {
-            font-size: 13px; /* Сделали крупнее и читаемее */
-            color: #8ea3b8; /* Более контрастный цвет, теперь отлично видно */
+            font-size: 13px; /* Крупнее, как просил */
+            color: #8ea3b8; /* Более контрастный и заметный цвет */
             word-break: break-word;
             line-height: 1.2;
         }
@@ -284,6 +348,7 @@
             gap: 6px;
             flex-shrink: 0;
             align-items: center;
+            align-self: center; /* Жесткое центрирование */
         }
 
         .action-btn {
@@ -307,7 +372,7 @@
             text-align: center;
             color: #52667a;
             font-size: 13px;
-            padding: 20px 0;
+            padding: 15px 0;
             font-style: italic;
         }
     </style>
@@ -324,6 +389,14 @@
         <div class="group-num">
             <label for="appNumber">№</label>
             <input type="text" id="appNumber" placeholder="25">
+        </div>
+        <div class="group-select">
+            <label for="appListType">Список</label>
+            <select id="appListType">
+                <option value="moderation">moderation</option>
+                <option value="update">update</option>
+                <option value="design">design</option>
+            </select>
         </div>
         <div class="group-bundle">
             <label for="appBundle">Бандл</label>
@@ -348,7 +421,8 @@
         </div>
     </div>
 
-    <div id="listContainer" class="list-container"></div>
+    <div id="listContainer" class="list-container">
+        </div>
 </div>
 
 <script>
@@ -357,8 +431,16 @@
     let editingId = null;
     let activeCardId = null;
 
+    // Хранение состояния раскрытых списков (по умолчанию все раскрыты)
+    let collapsedSections = JSON.parse(localStorage.getItem('collapsed_sections')) || {
+        moderation: false,
+        update: false,
+        design: false
+    };
+
     const appNameInput = document.getElementById('appName');
     const appNumberInput = document.getElementById('appNumber');
+    const appListTypeInput = document.getElementById('appListType');
     const appBundleInput = document.getElementById('appBundle');
     const addBtn = document.getElementById('addBtn');
     const searchBar = document.getElementById('searchBar');
@@ -377,15 +459,12 @@
         });
     });
 
-    // Полностью обновленный неубиваемый парсер умной вставки
+    // Умный парсер вставки строк
     appNameInput.addEventListener('input', (e) => {
         let val = e.target.value.replace(/\r?\n|\r/g, ' ').trim();
-        
-        // Регулярка для поиска любого бандла в строке
         const bundleRegex = /([a-zA-Z0-9_-]+\.[a-zA-Z0-9._-]+)/;
         const bundleMatch = val.match(bundleRegex);
         
-        // Регулярка для поиска номера (сначала ищем в начале строки, если нет - любое число отдельно)
         let numMatch = val.match(/^#?(\d+)/);
         if (!numMatch) {
             numMatch = val.match(/\b(\d+)\b/);
@@ -395,37 +474,35 @@
             const num = numMatch[1];
             const bundle = bundleMatch[1].trim();
             
-            // Чистим название от вырезанного номера и бандла
             let name = val;
             name = name.replace(numMatch[0], '');
             name = name.replace(bundle, '');
-            
-            // Удаляем разделители типа палочек, решеток и лишние пробелы
             name = name.replace(/[|#]/g, ' ');
             name = name.replace(/\s+/g, ' ').trim();
             
-            // Закидываем всё в инпуты
             appNumberInput.value = num;
             appBundleInput.value = bundle;
             appNameInput.value = name;
         }
     });
 
+    // Экспорт с учетом выбранного списка
     exportBtn.addEventListener('click', () => {
         if (appList.length === 0) {
             alert('Список пуст, экспортировать нечего!');
             return;
         }
-        const compactLines = appList.map(app => `${app.number || ''};;${app.name};;${app.bundle}`);
+        const compactLines = appList.map(app => `${app.number || ''};;${app.name};;${app.bundle};;${app.listType || 'moderation'}`);
         const compactString = compactLines.join('\n');
         
         navigator.clipboard.writeText(compactString).then(() => {
-            alert(`База сжата до ${compactString.length} симв. и скопирована!`);
+            alert(`База успешно экспортирована и скопирована в буфер!`);
         }).catch(err => {
             alert('Ошибка буфера. Скопируй вручную из окна:\n\n' + compactString);
         });
     });
 
+    // Импорт с поддержкой старого и нового форматов
     importBtn.addEventListener('click', () => {
         const str = prompt('Вставь текст бэкапа:');
         if (!str || !str.trim()) return;
@@ -439,7 +516,8 @@
                     id: (Date.now() + index).toString(),
                     number: parts[0].trim(),
                     name: parts[1].trim(),
-                    bundle: parts[2].trim()
+                    bundle: parts[2].trim(),
+                    listType: parts[3] ? parts[3].trim() : 'moderation' // Старые бэкапы падают в moderation
                 };
             });
             
@@ -448,20 +526,26 @@
                 selectedIds.clear();
                 activeCardId = null;
                 saveAndRefresh();
-                alert('База успешно импортирована!');
+                alert('База успешно восстановлена!');
             }
         } catch (e) {
             alert('Неверный формат данных бэкапа!');
         }
     });
 
-    document.addEventListener('click', (e) => {
+    // МГНОВЕННЫЙ ХЕНДЛЕР НА НАЖАТИЕ ЛКМ ИЛИ КОЛЕСИКА МЫШИ (auxclick / mousedown)
+    document.addEventListener('mousedown', (e) => {
+        // e.button === 0 (ЛКМ), e.button === 1 (Колёсико мыши)
+        if (e.button !== 0 && e.button !== 1) return;
+
         const linkWrapper = e.target.closest('.item-link-wrapper');
         const actionBtn = e.target.closest('.action-btn');
         const checkbox = e.target.closest('.checkbox-container');
         const backupBtn = e.target.closest('.btn-backup');
         const primaryBtn = e.target.closest('.btn-primary');
         const inputField = e.target.closest('input');
+        const selectField = e.target.closest('select');
+        const sectionHeader = e.target.closest('.section-header');
 
         if (linkWrapper) {
             const id = linkWrapper.getAttribute('data-id');
@@ -474,7 +558,8 @@
             if (newCard) {
                 newCard.classList.add('active-clicked');
             }
-        } else if (!actionBtn && !checkbox && !backupBtn && !primaryBtn && !inputField) {
+        } else if (!actionBtn && !checkbox && !backupBtn && !primaryBtn && !inputField && !selectField && !sectionHeader) {
+            // Если кликнули мимо всего важного, сбрасываем серый фокус
             if (activeCardId) {
                 const oldCard = document.querySelector(`.item-card[data-id="${activeCardId}"]`);
                 if (oldCard) oldCard.classList.remove('active-clicked');
@@ -483,10 +568,18 @@
         }
     });
 
+    // Функция переключения видимости секции списков
+    window.toggleSection = function(sectionName) {
+        collapsedSections[sectionName] = !collapsedSections[sectionName];
+        localStorage.setItem('collapsed_sections', JSON.stringify(collapsedSections));
+        renderList();
+    };
+
     function renderList() {
         listContainer.innerHTML = '';
         const searchKeyword = searchBar.value.toLowerCase().trim();
 
+        // Фильтруем весь массив по поисковому слову
         const filteredApps = appList.filter(app => {
             return (app.name.toLowerCase().includes(searchKeyword) ||
                     app.number.toLowerCase().includes(searchKeyword) ||
@@ -495,50 +588,74 @@
 
         totalCountSpan.textContent = filteredApps.length;
 
-        if (filteredApps.length === 0) {
-            listContainer.innerHTML = '<div class="empty-mock">Список пуст или ничего не найдено</div>';
-            updateBulkButtonsVisibility(filteredApps);
-            return;
-        }
+        // Создаем три предопределенные категории
+        const categories = ['moderation', 'update', 'design'];
 
-        const displayedApps = [...filteredApps].reverse();
+        categories.forEach(cat => {
+            // Берем элементы текущей категории и переворачиваем, чтобы новые были сверху
+            const catApps = filteredApps.filter(app => (app.listType || 'moderation') === cat);
+            const displayedApps = [...catApps].reverse();
 
-        displayedApps.forEach(app => {
-            const isChecked = selectedIds.has(app.id);
-            const isActive = (app.id === activeCardId);
+            const isCollapsed = collapsedSections[cat];
 
-            const card = document.createElement('div');
-            card.className = `item-card ${isActive ? 'active-clicked' : ''}`;
-            card.setAttribute('data-id', app.id);
-            card.innerHTML = `
-                <label class="checkbox-container">
-                    <input type="checkbox" class="item-checkbox" data-id="${app.id}" ${isChecked ? 'checked' : ''}>
-                    <span class="custom-checkbox"></span>
-                </label>
-                
-                <a href="https://play.google.com/store/apps/details?id=${app.bundle}" target="_blank" class="item-link-wrapper" data-id="${app.id}">
-                    <span class="item-num">${app.number ? '#' + app.number : '#__'}</span>
-                    <div class="item-text-center">
-                        <span class="item-name">${app.name}</span>
-                        <span class="item-bundle">${app.bundle || 'нет бандла'}</span>
-                    </div>
-                </a>
-                
-                <div class="item-actions">
-                    <button class="action-btn btn-edit" onclick="editItem('${app.id}')">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
-                    </button>
-                    <button class="action-btn btn-delete" onclick="deleteItem('${app.id}')">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
-                    </button>
-                </div>
+            // Создаем заголовок секции
+            const header = document.createElement('div');
+            header.className = `section-header ${isCollapsed ? 'collapsed' : ''}`;
+            header.setAttribute('onclick', `toggleSection('${cat}')`);
+            header.innerHTML = `
+                <span class="section-title">${cat} (<span class="section-count">${catApps.length}</span>)</span>
+                <span class="section-arrow">▼</span>
             `;
-            listContainer.appendChild(card);
+            listContainer.appendChild(header);
+
+            // Создаем контейнер для карточек внутри секции
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `section-content ${isCollapsed ? 'collapsed' : ''}`;
+            contentDiv.id = `section-${cat}`;
+
+            if (displayedApps.length === 0) {
+                contentDiv.innerHTML = '<div class="empty-mock">Список пуст</div>';
+            } else {
+                displayedApps.forEach(app => {
+                    const isChecked = selectedIds.has(app.id);
+                    const isActive = (app.id === activeCardId);
+
+                    const card = document.createElement('div');
+                    card.className = `item-card ${isActive ? 'active-clicked' : ''}`;
+                    card.setAttribute('data-id', app.id);
+                    card.innerHTML = `
+                        <label class="checkbox-container">
+                            <input type="checkbox" class="item-checkbox" data-id="${app.id}" ${isChecked ? 'checked' : ''}>
+                            <span class="custom-checkbox"></span>
+                        </label>
+                        
+                        <a href="https://play.google.com/store/apps/details?id=${app.bundle}" target="_blank" class="item-link-wrapper" data-id="${app.id}">
+                            <span class="item-num">${app.number ? '#' + app.number : '#__'}</span>
+                            <div class="item-text-center">
+                                <span class="item-name">${app.name}</span>
+                                <span class="item-bundle">${app.bundle || 'нет бандла'}</span>
+                            </div>
+                        </a>
+                        
+                        <div class="item-actions">
+                            <button class="action-btn btn-edit" onclick="editItem('${app.id}')">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteItem('${app.id}')">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                            </button>
+                        </div>
+                    `;
+                    contentDiv.appendChild(card);
+                });
+            }
+            listContainer.appendChild(contentDiv);
         });
 
         updateBulkButtonsVisibility(filteredApps);
     }
 
+    // Отслеживание чекбоксов массового удаления
     listContainer.addEventListener('change', (e) => {
         if (e.target.classList.contains('item-checkbox')) {
             const id = e.target.getAttribute('data-id');
@@ -574,9 +691,11 @@
         }
     });
 
+    // Добавление / Сохранение изменений
     addBtn.addEventListener('click', () => {
         const name = appNameInput.value.trim();
         const number = appNumberInput.value.trim();
+        const listType = appListTypeInput.value;
         const bundle = appBundleInput.value.trim();
 
         if (!name) {
@@ -595,7 +714,7 @@
         }
 
         if (editingId) {
-            appList = appList.map(app => app.id === editingId ? { ...app, name, number, bundle } : app);
+            appList = appList.map(app => app.id === editingId ? { ...app, name, number, bundle, listType } : app);
             editingId = null;
             addBtn.textContent = 'Добавить в список';
             addBtn.style.backgroundColor = '#2481cc';
@@ -604,7 +723,8 @@
                 id: Date.now().toString(),
                 name,
                 number,
-                bundle
+                bundle,
+                listType
             };
             appList.push(newApp);
         }
@@ -621,6 +741,7 @@
             appNameInput.value = item.name;
             appNumberInput.value = item.number;
             appBundleInput.value = item.bundle;
+            appListTypeInput.value = item.listType || 'moderation';
             editingId = id;
             addBtn.textContent = 'Сохранить изменения';
             addBtn.style.backgroundColor = '#e5a93c';
@@ -650,6 +771,7 @@
         renderList();
     }
 
+    // Первый запуск рендера
     renderList();
 </script>
 
